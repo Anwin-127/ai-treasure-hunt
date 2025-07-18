@@ -7,15 +7,23 @@ import LoadingScreen from './components/LoadingScreen';
 import { generateMessageList } from './utils/generatePrompt';
 import { DEEPSEEK_API_URL } from './config';
 import './App.css';
+import AdminClearLeaderboard from './components/AdminClearLeaderboard';
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [questionCount, setQuestionCount] = useState(0);
+  const [score, setScore] = useState(0); // Score starts at 0
   const [loading, setLoading] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [showTyping, setShowTyping] = useState(false);
   const chatWindowRef = useRef(null);
   const messagesRef = useRef(null); // New ref for .messages
+  const [showFinishModal, setShowFinishModal] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [startTime] = useState(Date.now());
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
 
   useEffect(() => {
     if (messages.length === 0) {
@@ -61,8 +69,16 @@ function App() {
         }
       );
 
-      const reply = response?.data?.choices?.[0]?.message?.content;
-      
+      let reply = response?.data?.choices?.[0]?.message?.content;
+      let isCorrect = false;
+      if (reply && reply.endsWith("correct")) {
+        // Only increment score if the previous message was from the user
+        const lastMsg = updated.length > 0 ? updated[updated.length - 1] : null;
+        if (lastMsg && lastMsg.sender === "user") {
+          isCorrect = true;
+        }
+        reply = reply.slice(0, -7); // Remove 'correct' from the end
+      }
       // Ensure minimum loading time
       const elapsedTime = Date.now() - startTime;
       const minLoadingTime = 1500; // 1.5 seconds
@@ -79,9 +95,10 @@ function App() {
         setGameOver(true);
       }
 
-      // Check for correct answer
-      if (reply.toLowerCase().includes("correct") && questionCount < 10) {
+      // Check for correct answer and update score
+      if (isCorrect && questionCount < 10) {
         setQuestionCount((prev) => prev + 1);
+        setScore((prev) => prev + 10);
       }
     } catch (error) {
       console.error('API Error:', error);
@@ -100,6 +117,37 @@ function App() {
     sendMessage("I need a hint, please!");
   };
 
+  const handleFinish = () => {
+    setShowFinishModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowFinishModal(false);
+    setUserName("");
+    setSubmitSuccess(false);
+  };
+
+  const handleNameChange = (e) => {
+    setUserName(e.target.value);
+  };
+
+  const handleSubmitScore = async () => {
+    if (!userName.trim()) return;
+    setSubmitting(true);
+    const timeTaken = Math.floor((Date.now() - startTime) / 1000); // seconds
+    try {
+      await axios.post('https://json-server-jcg2.onrender.com/leaderboard', {
+        name: userName,
+        score: score,
+        time: timeTaken
+      });
+      setSubmitSuccess(true);
+    } catch (err) {
+      alert('Failed to submit score. Please try again!');
+    }
+    setSubmitting(false);
+  };
+
   if (loading && messages.length === 0) {
     return <LoadingScreen />;
   }
@@ -116,7 +164,9 @@ function App() {
         minHeight: "100vh"
       }}
     >
+      <div className="score-badge">🏆 Score: {score}</div>
       <h1>Treasure Hunt Challenge</h1>
+      <button className="finish-btn" onClick={handleFinish}>Finish</button>
       
       <div className="chat-window" ref={chatWindowRef}>
         <div className="messages" ref={messagesRef}>
@@ -155,6 +205,34 @@ function App() {
           Congratulations! You've unlocked the treasure: <strong>cookies</strong>
         </div>
       )}
+      {showFinishModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Submit Your Score</h2>
+            {submitSuccess ? (
+              <>
+                <p>Score submitted! Thank you, {userName}!</p>
+                <button onClick={handleModalClose}>Close</button>
+              </>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  value={userName}
+                  onChange={handleNameChange}
+                  disabled={submitting}
+                />
+                <button onClick={handleSubmitScore} disabled={submitting || !userName.trim()}>
+                  {submitting ? 'Submitting...' : 'Submit'}
+                </button>
+                <button onClick={handleModalClose} disabled={submitting}>Cancel</button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      <AdminClearLeaderboard />
     </div>
   );
 }
