@@ -1,0 +1,142 @@
+.chat-message {
+  display: flex;
+  margin-bottom: 18px;
+  animation: messageSlideIn 0.4s ease-out;
+}
+
+.chat-message.user {
+  justify-content: flex-end;
+}
+
+.chat-message.bot {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 75%;
+  padding: 15px 20px;
+  border-radius: 20px;
+  font-size: 1rem;
+  line-height: 1.6;
+  word-wrap: break-word;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+.chat-message.user .message-bubble {
+  background: linear-gradient(135deg, #FF6F61, #ff5722);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+  margin-left: 20px;
+}
+
+.chat-message.bot .message-bubble {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-bottom-left-radius: 6px;
+  margin-right: 20px;
+}
+
+/* Markdown styling within messages */
+.message-bubble h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 10px 0;
+  color: inherit;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.message-bubble h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 8px 0;
+  color: inherit;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.message-bubble h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 6px 0;
+  color: inherit;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.message-bubble strong {
+  font-weight: 700;
+  color: #FFE066;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.message-bubble em {
+  font-style: italic;
+  color: #B8E6B8;
+  font-weight: 600;
+}
+
+.message-bubble br {
+  margin: 8px 0;
+}
+
+/* Special styling for treasure hunt elements */
+.message-bubble h3::before {
+  content: '🏴‍☠️ ';
+  font-size: 1.2rem;
+  margin-right: 5px;
+}
+
+.message-bubble h2::before {
+  content: '⚓ ';
+  font-size: 1.3rem;
+  margin-right: 5px;
+}
+
+/* Animation for message appearance */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.chat-message.user {
+  animation: messageSlideInRight 0.4s ease-out;
+}
+
+@keyframes messageSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .message-bubble {
+    max-width: 85%;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+  }
+  
+  .message-bubble h1 {
+    font-size: 1.3rem;
+  }
+  
+  .message-bubble h2 {
+    font-size: 1.2rem;
+  }
+  
+  .message-bubble h3 {
+    font-size: 1.1rem;
+  }
+}
