@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
-import ProgressBar from './components/ProgressBar';
+
 import LoadingScreen from './components/LoadingScreen';
 import { generateMessageList } from './utils/generatePrompt';
 import { DEEPSEEK_API_URL } from './config';
@@ -14,12 +14,20 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [showTyping, setShowTyping] = useState(false);
+  const chatWindowRef = useRef(null);
+  const messagesRef = useRef(null); // New ref for .messages
 
   useEffect(() => {
     if (messages.length === 0) {
       sendMessage(""); // Triggers the first question
     }
   }, []);
+
+  useEffect(() => {
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  }, [messages, showTyping]);
 
   const sendMessage = async (userInput) => {
     if (gameOver) return;
@@ -97,27 +105,38 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div
+      className="App"
+      style={{
+        backgroundImage: "url('/download.jpg')",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
+        backgroundAttachment: "fixed",
+        backgroundSize: "cover",
+        minHeight: "100vh"
+      }}
+    >
       <h1>Treasure Hunt Challenge</h1>
-      <ProgressBar progress={questionCount} />
       
-      <div className="chat-window">
-        {messages.map((msg, index) => (
-          <ChatMessage key={index} sender={msg.sender} text={msg.text} />
-        ))}
-        
-        {showTyping && (
-          <div className="chat-message bot">
-            <div className="message-bubble">
-              <div className="typing-indicator">
-                The Treasure Master is thinking...
-                <div className="typing-dot"></div>
-                <div className="typing-dot"></div>
-                <div className="typing-dot"></div>
+      <div className="chat-window" ref={chatWindowRef}>
+        <div className="messages" ref={messagesRef}>
+          {messages.map((msg, index) => (
+            <ChatMessage key={index} sender={msg.sender} text={msg.text} />
+          ))}
+          
+          {showTyping && (
+            <div className="chat-message bot">
+              <div className="message-bubble">
+                <div className="typing-indicator">
+                  The Treasure Master is thinking...
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                  <div className="typing-dot"></div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {!gameOver ? (
