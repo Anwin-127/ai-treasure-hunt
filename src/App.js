@@ -96,7 +96,7 @@ function App() {
       }
 
       // Check for correct answer and update score
-      if (isCorrect && questionCount < 10) {
+      if (isCorrect && questionCount < 20) {
         setQuestionCount((prev) => prev + 1);
         setScore((prev) => prev + 10);
       }
